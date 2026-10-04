@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-gonzalo-galdames
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-gonzalo-galdames
+  namespace: ns-gonzalo-galdames
+data:
+  AMBIENTE: "production"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-gonzalo-galdames
+  namespace: ns-gonzalo-galdames
+type: Opaque
+stringData:
+  API_KEY: "secret-key-gonzalo-12345"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-gonzalo-galdames
+  namespace: ns-gonzalo-galdames
+  labels:
+    app: app-gonzalo-galdames
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-gonzalo-galdames
+  template:
+    metadata:
+      labels:
+        app: app-gonzalo-galdames
+    spec:
+      containers:
+        - name: app-container
+          image: gongaldames/tarea-final:gonzalo-galdames
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: config-gonzalo-galdames
+            - secretRef:
+                name: secret-gonzalo-galdames
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-gonzalo-galdames
+  namespace: ns-gonzalo-galdames
+spec:
+  type: ClusterIP
+  selector:
+    app: app-gonzalo-galdames
+  ports:
+    - port: 80
+      targetPort: 3000
